@@ -1,0 +1,7 @@
+flask
+requests
+tensorflow
+numpy
+opencv-python-headless
+urllib3
+cupy-cuda11x
