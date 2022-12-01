@@ -6,22 +6,22 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-    component: app
+      component: app
   template:
     metadata:
       labels:
         component: app
-  spec:
-    containers:
-      - name: app
-        securityContext:
-          capabilities: # SYS_ADMIN capabilities needed for DCMG Exporter
-            add:
-              - SYS_ADMIN
-        resources:
-          limits:
-            nvidia.com/gpu: 1
-        image: mnj98/gpu-serverless:latest # You can use any GPU based image
+    spec:
+      containers:
+        - name: app
+          securityContext:
+            capabilities: # SYS_ADMIN capabilities needed for DCMG Exporter
+              add:
+                - SYS_ADMIN
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+          image: mnj98/gpu-serverless:latest # You can use any GPU based image
 
 ---
 apiVersion: v1
@@ -33,7 +33,7 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-  component: app
+    component: app
   ports:
   - name: http
     port: 5000
@@ -51,11 +51,11 @@ spec:
     apiVersion: apps/v1beta1
     kind: Deployment
     name: my-gpu-app
-metrics:
-  - type: Pods
-    pods:
-      metric:
-        name: DCGM_FI_DEV_GPU_UTIL
-      target:
-        type: AverageValue
-        averageValue: 30
+  metrics:
+    - type: Pods
+      pods:
+        metric:
+          name: DCGM_FI_DEV_GPU_UTIL
+        target:
+          type: AverageValue
+          averageValue: 30
