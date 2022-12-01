@@ -1,0 +1,19 @@
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+ name: my-gpu-app
+spec:
+ maxReplicas: 3  # Update this accordingly
+ minReplicas: 1
+ scaleTargetRef:
+   apiVersion: apps/v1beta1
+   kind: Deployment
+   name: my-gpu-app
+ metrics:
+ - type: Pods  # scale based on gpu
+   pods:
+     metric:
+       name: DCGM_FI_DEV_GPU_UTIL
+     target:
+       type: AverageValue
+       averageValue: 80
