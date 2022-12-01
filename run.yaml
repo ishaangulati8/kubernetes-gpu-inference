@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+name: my-gpu-app
+spec:
+replicas: 1
+selector:
+  matchLabels:
+    component: app
+template:
+  metadata:
+    labels:
+      component: app
+  spec:
+    containers:
+      - name: app
+        securityContext:
+          capabilities: # SYS_ADMIN capabilities needed for DCMG Exporter
+            add:
+              - SYS_ADMIN
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+        image: mnj98/gpu-serverless:latest # You can use any GPU based image
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+name: app-ip
+labels:
+  component: app
+spec:
+type: LoadBalancer
+selector:
+  component: app
+ports:
+  - name: http
+    port: 5000
+    targetPort: 5000 # The port might be different for your application
+
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+name: my-gpu-app
+spec:
+maxReplicas: 2 # Update this according to your desired number of replicas
+minReplicas: 1
+scaleTargetRef:
+  apiVersion: apps/v1beta1
+  kind: Deployment
+  name: my-gpu-app
+metrics:
+  - type: Pods
+    pods:
+      metric:
+        name: DCGM_FI_DEV_GPU_UTIL
+      target:
+        type: AverageValue
+        averageValue: 30
