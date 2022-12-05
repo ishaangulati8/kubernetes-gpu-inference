@@ -8,6 +8,7 @@ import tensorflow.keras.applications as apps
 import numpy as np
 import cv2
 import os
+import time
 #from cupyx.profiler import benchmark
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 from urllib.request import urlopen
@@ -39,6 +40,7 @@ def vgg19():
 
 def process_inference_req(model, image_files):
     #print(model, image_files)
+    start = time.process_time()
     images = []
     names = []
     for name in image_files.keys():
@@ -64,9 +66,11 @@ def process_inference_req(model, image_files):
         '''
     images = preprocess_function[model](np.array(images))
     predictions = decode_function[model](models[model].predict_on_batch(images), top=TOP_X_PRED)
-    return format_output(predictions, names)
+    end = time.process_time() - start
+    print("--time = "+ str(end) )
+    return format_output(predictions, names, end)
 
-def format_output(preds, names):
+def format_output(preds, names, t):
     out = ""
     for i in range(len(preds)):
         out += "Top " + str(TOP_X_PRED) + " Predictions for " + names[i] + ":\n"
@@ -74,6 +78,7 @@ def format_output(preds, names):
             out += "\t" + str(j) + " - " + preds[i][j][1] + ", confidence = " + str(preds[i][j][2])
             out += "\n"
         out += "\n"
+    out += "time taken = " + str(t) + "s"
     return out
     '''
     content_type = request.headers.get('Content-Type')
