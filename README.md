@@ -45,8 +45,51 @@ nginx.service - A high performance web server and a reverse proxy server
 <br>
 
 <h1> GPU Nodes </h1>
+If nvidia and docker dependencies are not yet installed install them.
+
+```bash
+#Install CUDA
+sudo apt-get install linux-headers-$(uname -r)
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID | sed -e 's/\.//g')
+wget https://developer.download.nvidia.com/compute/cuda/repos/$distribution/x86_64/cuda-keyring_1.0-1_all.deb
+sudo dpkg -i cuda-keyring_1.0-1_all.deb
+
+sudo apt-get update
+sudo apt-get -y install cuda-drivers
+
+#REBOOT & test with nvidia-smi
+
+#install docker if not installed already
+curl -fsSL https://get.docker.com | sudo sh
+
+#install Nvidia docker
+#The following 5 lines are a single command
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
+      && curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+      && curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
+            sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+            sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+            
+       
+sudo apt-get update
+sudo apt-get install -y nvidia-docker2
+sudo systemctl restart docker
+
+#test with:
+sudo docker run --rm --gpus all nvidia/cuda:11.0.3-base-ubuntu20.04 nvidia-smi
+```
+
+
+
+
+
 GPU Nodes - execute inference task with image files
     
 Steps
 Download docker image
+
+```bash
+sudo docker pull mnj98/gpu-serverless:latest
+```
  Run docker image
+ Use the run.sh script 
